@@ -52,11 +52,16 @@ public class Enemy : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    private void Start()
+    private void OnEnable()
     {
         curHp = maxHp;
+        //StageManager.instance.monsters.Add(gameObject);
     }
 
+    private void OnDisable()
+    {
+        StageManager.instance.aliveMonster.Remove(gameObject);
+    }
     private void Update()
     {
         if (!isDie)

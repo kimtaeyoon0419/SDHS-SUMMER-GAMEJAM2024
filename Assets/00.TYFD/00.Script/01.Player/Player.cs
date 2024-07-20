@@ -46,7 +46,8 @@ public class Player : MonoBehaviour
     private bool isDash;
     [SerializeField] private float dashSpeed;
     [SerializeField] private float dashTime;
-    [SerializeField] private float startDashTime;
+    [SerializeField] private float dashCoolTime;
+    [SerializeField] private bool dashOn;
     private float originalMoveSpeed;
     private Coroutine dashCoroutine;
 
@@ -99,7 +100,7 @@ public class Player : MonoBehaviour
         {
             Attack();
         }
-        if(Input.GetKeyDown(KeyCode.Z) && x != 0)
+        if(Input.GetKeyDown(KeyCode.Z) && x != 0 && dashOn == false)
         {
             dashCoroutine = StartCoroutine(Co_Dash(x));
         }
@@ -133,18 +134,17 @@ public class Player : MonoBehaviour
         hor = x;
         animator.SetTrigger(hashDash);
         isDash = true;
+        dashOn = true;
         originalMoveSpeed = moveSpeed;
         moveSpeed = dashSpeed;
 
         yield return new WaitForSeconds(dashTime);
-
-        DashEnd();
-    }
-    private void DashEnd()
-    {
-        isDash = false;
         moveSpeed = originalMoveSpeed;
+        isDash = false;
+        yield return new WaitForSeconds(dashCoolTime);
+        dashOn = false;
     }
+    
 
 
     /// <summary>
