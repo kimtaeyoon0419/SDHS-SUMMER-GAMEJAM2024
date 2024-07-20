@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -17,6 +18,8 @@ public class Player : MonoBehaviour
     [SerializeField] private float attackSpeed;
     [SerializeField] private float moveSpeed;
     [SerializeField] private int attackCount;
+    [SerializeField] private float jumpPower;
+    private bool isJumping;
 
     [Header("Animation")]
     private readonly int hashMove = Animator.StringToHash("Move");
@@ -31,6 +34,9 @@ public class Player : MonoBehaviour
 
     [Header("Color")]
     private Color hitColor = Color.black;
+
+    [Header("HPbar")]
+    [SerializeField] private Image hpBar;
 
     private void Awake()
     {
@@ -55,11 +61,24 @@ public class Player : MonoBehaviour
         Gizmos.DrawWireCube(attackBoxPos.position, attackBoxSize);
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isJumping = false;
+        }
+    }
+
     private void InputFunction()
     {
         float hor = Input.GetAxisRaw("Horizontal");
         Move(hor);
         Flip(hor);
+
+        if(Input.GetKeyDown(KeyCode.Space) && !isJumping)
+        {
+            Jump();
+        }
 
         if (Input.GetKeyDown(KeyCode.X))
         {
@@ -94,6 +113,12 @@ public class Player : MonoBehaviour
         {
             transform.localScale = new Vector3(1.5f * x, 1.5f, 1.5f);
         }
+    }
+
+    private void Jump()
+    {
+        rb.velocity = Vector2.up * jumpPower;
+        isJumping = true;
     }
 
     private void Attack()
@@ -149,6 +174,7 @@ public class Player : MonoBehaviour
     public void TakeDamage(float Damage)
     {
         curHp -= Damage;
+        hpBar.fillAmount = curHp / maxHp;
         if (curHp < 0)
         {
             Die();

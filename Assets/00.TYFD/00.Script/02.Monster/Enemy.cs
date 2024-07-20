@@ -1,6 +1,7 @@
 // # System
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 // # Unity
 using UnityEngine;
@@ -39,6 +40,7 @@ public class Enemy : MonoBehaviour
 
     [Header("HitEffect")]
     [SerializeField] private GameObject hitEffect;
+    [SerializeField] private TextMeshPro hitText;
 
     [Header("Die")]
     private bool isDie;
@@ -70,6 +72,10 @@ public class Enemy : MonoBehaviour
             }
             Move();
         }
+        if(isDie)
+        {
+            rb.constraints = RigidbodyConstraints2D.FreezePositionX;
+        }
     }
 
     private void OnDrawGizmos()
@@ -84,24 +90,39 @@ public class Enemy : MonoBehaviour
     {
         if (playerCollider != null)
         {
-            float x = Vector2.Distance(playerCollider.transform.position, gameObject.transform.position);
-            if (x < 0)
+            if (playerCollider != null)
             {
-                rb.velocity = new Vector2(followMoveSpeed, rb.velocity.y);
-                transform.localScale = new Vector3(1.5f * 1, 1.5f, 1.5f);
-                animator.SetBool(hashMove, true);
+                // 플레이어와의 거리를 계산
+                float distance = Vector2.Distance(playerCollider.transform.position, transform.position);
+
+                // 플레이어가 몬스터의 왼쪽에 있는지 오른쪽에 있는지 확인
+                if (playerCollider.transform.position.x < transform.position.x)
+                {
+                    // 플레이어가 왼쪽에 있으면 왼쪽으로 이동
+                    rb.velocity = new Vector2(followMoveSpeed * -1, rb.velocity.y);
+                    transform.localScale = new Vector3(1.5f * -1, 1.5f, 1.5f);
+                    animator.SetBool(hashMove, true);
+                }
+                else if (playerCollider.transform.position.x > transform.position.x)
+                {
+                    // 플레이어가 오른쪽에 있으면 오른쪽으로 이동
+                    rb.velocity = new Vector2(followMoveSpeed, rb.velocity.y);
+                    transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+                    animator.SetBool(hashMove, true);
+                }
+
+                // 플레이어와의 거리가 일정 이하일 때 공격
+                if (distance < 2f)
+                {
+                    Debug.Log(distance);
+                    rb.velocity = Vector2.zero;
+                    Attack();
+                }
             }
-            else if (0 < x)
+            else
             {
-                rb.velocity = new Vector2(followMoveSpeed * -1, rb.velocity.y);
-                transform.localScale = new Vector3(1.5f * -1, 1.5f, 1.5f);
-                animator.SetBool(hashMove,true);
-            }
-            if (x < 2f)
-            {
-                Debug.Log(x);
                 rb.velocity = Vector2.zero;
-                Attack();
+                animator.SetBool(hashMove, false);
             }
         }
         else
@@ -135,19 +156,29 @@ public class Enemy : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-        curHp -= damage;
-        Debug.Log("몬스터의 현재 체력 : " + curHp);  
-        StartCoroutine(Co_ChangeHitColor());
-        if (curHp <= 0 && !isDie)
+        if (!isDie)
         {
-            Debug.Log("죽었다");
-            Die();
+            curHp -= damage;
+            Debug.Log("몬스터의 현재 체력 : " + curHp);
+            StartCoroutine(Co_ChangeHitColor());
+            if (curHp <= 0)
+            {
+                Debug.Log("죽었다");
+                Die();
+            }
+            else
+            {
+                Instantiate(hitEffect, transform.position, Quaternion.identity);
+                TextMeshPro text = Instantiate(hitText, new Vector2(transform.position.x, transform.position.y + 5f), Quaternion.identity);
+                text.text = damage.ToString();
+            }
         }
     }
 
     private void Die()
     {
         // 죽는 애니메이션 실행
+        gameObject.layer = LayerMask.NameToLayer("DeadEnemy");
         isDie = true;
         animator.SetTrigger(hashDie);
         StartCoroutine(Co_Destroy());
@@ -161,7 +192,7 @@ public class Enemy : MonoBehaviour
 
     IEnumerator Co_ChangeHitColor()
     {
-        for (int i = 0; i < 1   ; i++)
+        for (int i = 0; i < 1; i++)
         {
             yield return new WaitForSeconds(0.1f);
             spriteRenderer.color = hitColor;

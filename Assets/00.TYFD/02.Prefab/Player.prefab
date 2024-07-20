@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 470610266}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.9, z: 0}
+  m_LocalPosition: {x: 0, y: 2.51, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -188,7 +188,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 5
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
@@ -222,12 +222,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88828bb231161d744ba7f4bf9f339f0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 0
+  maxHp: 100
   curHp: 0
   attackPower: 2
-  attackSpeed: 0
-  curAttackSpeed: 0
+  attackSpeed: 0.2
   moveSpeed: 10
   attackCount: 0
+  jumpPower: 15
   attackBoxPos: {fileID: 1537915909}
   attackBoxSize: {x: 2, y: 2}
+  hpBar: {fileID: 0}
