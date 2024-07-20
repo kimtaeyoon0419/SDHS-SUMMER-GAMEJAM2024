@@ -134,7 +134,7 @@ public class Player : MonoBehaviour
         }
         if(Input.GetKeyDown(KeyCode.E) && isPortal)
         {
-
+            StageManager.instance.StageChageTrigger();
         }
     }
 

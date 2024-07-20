@@ -5,8 +5,11 @@ public class CameraManager : MonoBehaviour
 {
     public static CameraManager instance;
 
-    private CinemachineVirtualCamera virtualCamera;
+    public CinemachineVirtualCamera virtualCamera;
+    public CinemachineVirtualCamera lastvirtualCamera;
     private float shakeTimer;
+
+    public GameObject[] cams;
 
     private void Awake()
     {
@@ -20,7 +23,7 @@ public class CameraManager : MonoBehaviour
             Destroy(gameObject);
         }
 
-        virtualCamera = GetComponent<CinemachineVirtualCamera>();
+        //virtualCamera = GetComponent<CinemachineVirtualCamera>();
     }
 
     public void CameraShake(float intensity, float time)
@@ -48,5 +51,10 @@ public class CameraManager : MonoBehaviour
                 cinemachinePerlin.m_AmplitudeGain = 0f;
             }
         }
+    }
+
+    public void ChageCam(int index)
+    {
+        cams[index].gameObject.SetActive(true);
     }
 }

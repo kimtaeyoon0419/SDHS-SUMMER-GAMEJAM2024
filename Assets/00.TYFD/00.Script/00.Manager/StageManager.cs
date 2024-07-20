@@ -47,12 +47,17 @@ public class StageManager : MonoBehaviour
 
     private void Start()
     {
-        InitStage("Stage1");
+        InitStage("Tutorial");
     }
 
     private void InitStage(string stageName)
     {
         int index = 0;
+        if(aliveMonster.Count > 0)
+        {
+            aliveMonster.Clear();
+        }
+
         foreach (var stage in Stages) // 현재 스테이지 검사
         {
             if (stageName == stage.stageName)
@@ -65,6 +70,7 @@ public class StageManager : MonoBehaviour
                     aliveMonster.Add(enemy);
                     Debug.Log("스폰성공!");
                 }
+                CameraManager.instance.ChageCam(index);
                 curStagePortal = stage.stagePortal;
                 break;
             }
@@ -89,6 +95,18 @@ public class StageManager : MonoBehaviour
         else
         {
             monsterCountText.text = aliveMonster.Count.ToString();
+        }
+    }
+
+    public void StageChageTrigger()
+    {
+        int index = Random.Range(0, Stages.Count - 1);
+
+        switch (index)
+        {
+            case 0:
+                InitStage("Stage1");
+                break;
         }
     }
 }

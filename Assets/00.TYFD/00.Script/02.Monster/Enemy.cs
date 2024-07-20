@@ -74,14 +74,14 @@ public class Enemy : MonoBehaviour
         }
         if(isDie)
         {
-            rb.constraints = RigidbodyConstraints2D.FreezePositionX;
+            rb.constraints = RigidbodyConstraints2D.FreezeAll;
         }
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, 3f);
+        Gizmos.DrawWireSphere(transform.position, 10f);
         Gizmos.color = Color.red;
         Gizmos.DrawWireCube(attackPos.position, attackBox);
     }
