@@ -35,6 +35,11 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        PlayMusic("MainThema");
+    }
+
     public void PlayMusic(string name)
     {
         foreach(var sound in bgms)
@@ -65,5 +70,15 @@ public class AudioManager : MonoBehaviour
                 Debug.Log("효과음을 찾을 수 없습니다.");
             }
         }
+    }
+
+    public void MusicVolume(float volume)
+    {
+        bgmSource.volume = volume;
+    }
+
+    public void SFXVolume(float volume)
+    {
+        sfxSource.volume = volume;
     }
 }
