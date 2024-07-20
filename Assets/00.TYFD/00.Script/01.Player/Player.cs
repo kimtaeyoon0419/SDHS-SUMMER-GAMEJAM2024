@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,12 +21,15 @@ public class Player : MonoBehaviour
     [SerializeField] private int attackCount;
     [SerializeField] private float jumpPower;
     private bool isJumping;
+    private float hor;
 
     [Header("Animation")]
     private readonly int hashMove = Animator.StringToHash("Move");
     private readonly int hashAttack1 = Animator.StringToHash("Attack1");
     private readonly int hashAttack2 = Animator.StringToHash("Attack2");
     private readonly int hashAttack3 = Animator.StringToHash("Attack3");
+    private readonly int hashDash = Animator.StringToHash("Dash");
+    private readonly int hashIdle = Animator.StringToHash("Idle");
 
     [Header("Attack")]
     private bool isAttack = false;
@@ -37,6 +41,14 @@ public class Player : MonoBehaviour
 
     [Header("HPbar")]
     [SerializeField] private Image hpBar;
+
+    [Header("Dash")]
+    private bool isDash;
+    [SerializeField] private float dashSpeed;
+    [SerializeField] private float dashTime;
+    [SerializeField] private float startDashTime;
+    private float originalMoveSpeed;
+    private Coroutine dashCoroutine;
 
     private void Awake()
     {
@@ -71,9 +83,12 @@ public class Player : MonoBehaviour
 
     private void InputFunction()
     {
-        float hor = Input.GetAxisRaw("Horizontal");
-        Move(hor);
-        Flip(hor);
+        float x = Input.GetAxisRaw("Horizontal");
+        if (x == 0 && isDash)
+            x = hor;
+
+        Move(x);
+        Flip(x);
 
         if(Input.GetKeyDown(KeyCode.Space) && !isJumping)
         {
@@ -84,6 +99,10 @@ public class Player : MonoBehaviour
         {
             Attack();
         }
+        if(Input.GetKeyDown(KeyCode.Z) && x != 0)
+        {
+            dashCoroutine = StartCoroutine(Co_Dash(x));
+        }
     }
 
     /// <summary>
@@ -92,7 +111,14 @@ public class Player : MonoBehaviour
     /// <param name="x">좌우 값</param>
     private void Move(float x)
     {
-        rb.velocity = new Vector2(x * moveSpeed, rb.velocity.y);
+        if (!isDash)
+        {
+            rb.velocity = new Vector2(x * moveSpeed, rb.velocity.y);
+        }
+        else
+        {
+            rb.velocity = new Vector2(hor * moveSpeed, rb.velocity.y);
+        }
         if (x != 0)
         {
             animator.SetBool(hashMove, true);
@@ -102,6 +128,24 @@ public class Player : MonoBehaviour
             animator.SetBool(hashMove, false);
         }
     }
+    IEnumerator Co_Dash(float x)
+    {
+        hor = x;
+        animator.SetTrigger(hashDash);
+        isDash = true;
+        originalMoveSpeed = moveSpeed;
+        moveSpeed = dashSpeed;
+
+        yield return new WaitForSeconds(dashTime);
+
+        DashEnd();
+    }
+    private void DashEnd()
+    {
+        isDash = false;
+        moveSpeed = originalMoveSpeed;
+    }
+
 
     /// <summary>
     /// 방향전환
