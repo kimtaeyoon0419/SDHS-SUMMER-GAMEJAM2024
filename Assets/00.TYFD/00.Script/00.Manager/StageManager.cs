@@ -28,7 +28,7 @@ public class StageManager : MonoBehaviour
     public static StageManager instance;
 
     [Header("Player")]
-    [SerializeField] private GameObject playerObject;
+    [SerializeField] public GameObject playerObject;
 
     [Header("Monster")]
     [SerializeField] public List<SpawnMonsterIndex> Stages = new List<SpawnMonsterIndex>();
@@ -39,6 +39,9 @@ public class StageManager : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI monsterCountText;
+
+    [Header("LastStage")]
+    private int lastStage;
 
     private void Awake()
     {
@@ -53,6 +56,7 @@ public class StageManager : MonoBehaviour
     private void InitStage(string stageName)
     {
         int index = 0;
+        int stageCount = 0;
         if(aliveMonster.Count > 0)
         {
             aliveMonster.Clear();
@@ -70,7 +74,7 @@ public class StageManager : MonoBehaviour
                     aliveMonster.Add(enemy);
                     Debug.Log("스폰성공!");
                 }
-                CameraManager.instance.ChageCam(index);
+                CameraManager.instance.ChageCam(stageCount);
                 curStagePortal = stage.stagePortal;
                 break;
             }
@@ -78,6 +82,7 @@ public class StageManager : MonoBehaviour
             {
                 Debug.Log("이름이 다릅니다!");
             }
+            stageCount++;
         }
     }
 
@@ -85,7 +90,7 @@ public class StageManager : MonoBehaviour
     {
         if (aliveMonster.Count <= 0)
         {
-            monsterCountText.text = "모든 몬스터를 처치했습니다!";
+            monsterCountText.text = "포탈로!";
             if (curStagePortal != null)
             {
                 curStagePortal.isOpen = true;
@@ -101,11 +106,22 @@ public class StageManager : MonoBehaviour
     public void StageChageTrigger()
     {
         int index = Random.Range(0, Stages.Count - 1);
+        while(index != lastStage)
+        {
+            index = Random.Range(0, Stages.Count - 1);
+        }
+        lastStage = index;
 
         switch (index)
         {
             case 0:
                 InitStage("Stage1");
+                break;
+            case 1:
+                InitStage("Stage2");
+                break;
+            case 2:
+                InitStage("Stage3");
                 break;
         }
     }

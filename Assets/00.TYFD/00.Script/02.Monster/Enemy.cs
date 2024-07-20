@@ -19,7 +19,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float maxHp;
     [SerializeField] private float curHp;
     [SerializeField] private float followMoveSpeed;
-    [SerializeField] private float attackPower;
+    [SerializeField] public float attackPower;
 
     [Header("Color")]
     private SpriteRenderer spriteRenderer;
@@ -59,7 +59,7 @@ public class Enemy : MonoBehaviour
     }
     private void Update()
     {
-        if (!isDie)
+        if (!isDie && GameManager.instance.curGameState != curGameState.selectItem)
         {
             Collider2D detectedPlayer = Physics2D.OverlapCircle(transform.position, 10f, playerLayer);
             if (detectedPlayer != null)
@@ -94,12 +94,18 @@ public class Enemy : MonoBehaviour
             {
                 // 플레이어와의 거리를 계산
                 float distance = Vector2.Distance(playerCollider.transform.position, transform.position);
-
+                if (distance < 2f)
+                {
+                    Debug.Log(distance);
+                    rb.velocity = Vector2.zero;
+                    Attack();
+                }
                 // 플레이어가 몬스터의 왼쪽에 있는지 오른쪽에 있는지 확인
-                if (playerCollider.transform.position.x < transform.position.x)
+                else if (playerCollider.transform.position.x < transform.position.x)
                 {
                     // 플레이어가 왼쪽에 있으면 왼쪽으로 이동
                     rb.velocity = new Vector2(followMoveSpeed * -1, rb.velocity.y);
+                    //transform.Translate(Vector2.right * followMoveSpeed * -1 * Time.deltaTime);
                     transform.localScale = new Vector3(1.5f * -1, 1.5f, 1.5f);
                     animator.SetBool(hashMove, true);
                 }
@@ -107,17 +113,13 @@ public class Enemy : MonoBehaviour
                 {
                     // 플레이어가 오른쪽에 있으면 오른쪽으로 이동
                     rb.velocity = new Vector2(followMoveSpeed, rb.velocity.y);
+                    //transform.Translate(Vector2.right * followMoveSpeed * 1 * Time.deltaTime);
+
                     transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
                     animator.SetBool(hashMove, true);
                 }
 
                 // 플레이어와의 거리가 일정 이하일 때 공격
-                if (distance < 2f)
-                {
-                    Debug.Log(distance);
-                    rb.velocity = Vector2.zero;
-                    Attack();
-                }
             }
             else
             {
@@ -154,13 +156,15 @@ public class Enemy : MonoBehaviour
         isAttack = false;
     }
 
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, bool isSkill)
     {
         if (!isDie)
         {
             curHp -= damage;
             Debug.Log("몬스터의 현재 체력 : " + curHp);
             StartCoroutine(Co_ChangeHitColor());
+            TextMeshPro text = Instantiate(hitText, new Vector2(transform.position.x, transform.position.y + 5f), Quaternion.identity);
+            text.text = damage.ToString("F2");
             if (curHp <= 0)
             {
                 Debug.Log("죽었다");
@@ -170,9 +174,10 @@ public class Enemy : MonoBehaviour
             else
             {
                 CameraManager.instance.CameraShake(5, 0.2f);
-                Instantiate(hitEffect, transform.position, Quaternion.identity);
-                TextMeshPro text = Instantiate(hitText, new Vector2(transform.position.x, transform.position.y + 5f), Quaternion.identity);
-                text.text = damage.ToString();
+                if (!isSkill)
+                {
+                    Instantiate(hitEffect, transform.position, Quaternion.identity);
+                }
             }
         }
     }

@@ -23,6 +23,8 @@ public class Player : MonoBehaviour
     [SerializeField] private float jumpPower;
     private bool isJumping;
     private float hor;
+    [SerializeField] public bool skillLock = true;
+    [SerializeField] public int recoveryCount = 0;
 
     [Header("Animation")]
     private readonly int hashMove = Animator.StringToHash("Move");
@@ -52,11 +54,18 @@ public class Player : MonoBehaviour
     private float originalMoveSpeed;
     private Coroutine dashCoroutine;
 
+    [Header("Skill")]
+    [SerializeField] private GameObject skillObj;
+    [SerializeField] private float maxSkillCoolTime;
+    [SerializeField] private float curSkillCoolTime;
+
     [Header("Portal")]
     [SerializeField] private bool isPortal;
 
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI portalText;
+    [SerializeField] private Image skillBlackPnl;
+    [SerializeField] private Transform skillPos;
 
     private void Awake()
     {
@@ -72,7 +81,15 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        InputFunction();
+        if (GameManager.instance.curGameState != curGameState.selectItem)
+        {
+            InputFunction();
+            if(!skillLock && curSkillCoolTime >= 0)
+            {
+                curSkillCoolTime -= Time.deltaTime;
+                skillBlackPnl.fillAmount = curSkillCoolTime / maxSkillCoolTime;
+            }
+        }
     }
 
     private void OnDrawGizmos()
@@ -86,6 +103,20 @@ public class Player : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isJumping = false;
+        }
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            float attackPower = 0;
+            if(collision.gameObject.GetComponent<Enemy>() != null)
+            {
+                attackPower = collision.gameObject.GetComponent<Enemy>().attackPower;
+            }
+            else if (collision.gameObject.GetComponent<Boss1>() != null)
+            {
+                attackPower = collision.gameObject.GetComponent<Boss1>().attackPower;
+            }
+
+            TakeDamage(attackPower);
         }
     }
 
@@ -134,8 +165,23 @@ public class Player : MonoBehaviour
         }
         if(Input.GetKeyDown(KeyCode.E) && isPortal)
         {
-            StageManager.instance.StageChageTrigger();
+            InGameUIManager.instance.StartFadeOut(true);
         }
+        if (Input.GetKeyDown(KeyCode.F) && curSkillCoolTime <= 0)
+        {
+            curSkillCoolTime = maxSkillCoolTime;
+            Skill();
+        }
+    }
+
+    private void Skill()
+    {
+        if (isAttack)
+            return;
+        GameObject bolt = Instantiate(skillObj, skillPos.position, Quaternion.identity);
+        animator.SetTrigger(hashAttack2);
+        bolt.GetComponent<Bolt>().attackPower = attackPower * 1.25f;
+        bolt.transform.localScale = -transform.localScale.normalized;
     }
 
     /// <summary>
@@ -169,10 +215,11 @@ public class Player : MonoBehaviour
         dashOn = true;
         originalMoveSpeed = moveSpeed;
         moveSpeed = dashSpeed;
-
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), true); // 몬스터와 충돌무시
         yield return new WaitForSeconds(dashTime);
         moveSpeed = originalMoveSpeed;
         isDash = false;
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), false); // 몬스터와 충돌무시
         yield return new WaitForSeconds(dashCoolTime);
         dashOn = false;
     }
@@ -233,7 +280,8 @@ public class Player : MonoBehaviour
         {
             foreach (Collider2D enemy in curEnemy)
             {
-                enemy.GetComponent<Enemy>()?.TakeDamage(attackPower);
+                enemy.GetComponent<Enemy>()?.TakeDamage(attackPower, false);
+                enemy.GetComponent<Boss1>()?.TakeDamage(attackPower, false);
             }
         }
     }
@@ -249,6 +297,10 @@ public class Player : MonoBehaviour
 
     public void TakeDamage(float Damage)
     {
+        if(isDash)
+        {
+            return;
+        }
         curHp -= Damage;
         hpBar.fillAmount = curHp / maxHp;
         if (curHp < 0)
@@ -257,12 +309,14 @@ public class Player : MonoBehaviour
         }
         else
         {
+            CameraManager.instance.CameraShake(5, 0.2f);
             StartCoroutine(Co_HitChageColor());
         }
     }
 
     IEnumerator Co_HitChageColor()
     {
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), true); // 몬스터와 충돌무시
         for (int i = 0; i < 1; i++)
         {
             yield return new WaitForSeconds(0.1f);
@@ -270,10 +324,18 @@ public class Player : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
             spriteRenderer.color = Color.white;
         }
+        Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), false); // 몬스터와 충돌무시
     }
 
     private void Die()
     {
 
+    }
+
+    public void StatUp(float hp, float damage)
+    {
+        maxHp += hp;
+        curHp += hp;
+        attackPower += damage;
     }
 }
