@@ -168,6 +168,7 @@ public class Enemy : MonoBehaviour
             }
             else
             {
+                CameraManager.instance.CameraShake(5, 0.2f);
                 Instantiate(hitEffect, transform.position, Quaternion.identity);
                 TextMeshPro text = Instantiate(hitText, new Vector2(transform.position.x, transform.position.y + 5f), Quaternion.identity);
                 text.text = damage.ToString();
