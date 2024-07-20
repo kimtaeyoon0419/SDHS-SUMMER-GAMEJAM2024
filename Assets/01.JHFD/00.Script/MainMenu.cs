@@ -8,6 +8,8 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private bool isOptionPanel;
     [SerializeField] private GameObject CreditPanel;
     [SerializeField] private bool isCreditPanel;
+    [SerializeField] private GameObject StartPanel;
+    [SerializeField] private bool isStartPanel;
 
     // Start is called before the first frame update
     void Start()
@@ -23,7 +25,8 @@ public class MainMenu : MonoBehaviour
 
     public void OnClickStart()
     {
-        Debug.Log("시작하기");
+        isStartPanel = !isStartPanel;
+        StartPanel.SetActive(isStartPanel);
     }
 
     public void OnClickOption()
