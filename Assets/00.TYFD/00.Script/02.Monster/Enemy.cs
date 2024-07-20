@@ -57,11 +57,6 @@ public class Enemy : MonoBehaviour
         curHp = maxHp;
         //StageManager.instance.monsters.Add(gameObject);
     }
-
-    private void OnDisable()
-    {
-        StageManager.instance.aliveMonster.Remove(gameObject);
-    }
     private void Update()
     {
         if (!isDie)
@@ -169,6 +164,7 @@ public class Enemy : MonoBehaviour
             if (curHp <= 0)
             {
                 Debug.Log("ав╬З╢ы");
+                StageManager.instance.aliveMonster.Remove(gameObject);
                 Die();
             }
             else

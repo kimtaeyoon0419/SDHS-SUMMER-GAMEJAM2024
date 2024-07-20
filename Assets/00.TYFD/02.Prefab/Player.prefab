@@ -234,4 +234,7 @@ MonoBehaviour:
   hpBar: {fileID: 0}
   dashSpeed: 20
   dashTime: 0.2
-  startDashTime: 0
+  dashCoolTime: 2
+  dashOn: 0
+  isPortal: 0
+  portalText: {fileID: 0}

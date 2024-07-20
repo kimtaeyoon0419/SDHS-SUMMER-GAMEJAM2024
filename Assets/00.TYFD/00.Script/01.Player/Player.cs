@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -51,6 +52,12 @@ public class Player : MonoBehaviour
     private float originalMoveSpeed;
     private Coroutine dashCoroutine;
 
+    [Header("Portal")]
+    [SerializeField] private bool isPortal;
+
+    [Header("UI")]
+    [SerializeField] private TextMeshProUGUI portalText;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -82,6 +89,27 @@ public class Player : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Portal"))
+        {
+            if (collision.GetComponent<Portal>().isOpen)
+            {
+                portalText.gameObject.SetActive(true);
+                isPortal = true;
+            }
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Portal"))
+        {
+            portalText.gameObject.SetActive(false);
+            isPortal = false;
+        }
+    }
+
     private void InputFunction()
     {
         float x = Input.GetAxisRaw("Horizontal");
@@ -91,7 +119,7 @@ public class Player : MonoBehaviour
         Move(x);
         Flip(x);
 
-        if(Input.GetKeyDown(KeyCode.Space) && !isJumping)
+        if (Input.GetKeyDown(KeyCode.Space) && !isJumping)
         {
             Jump();
         }
@@ -100,9 +128,13 @@ public class Player : MonoBehaviour
         {
             Attack();
         }
-        if(Input.GetKeyDown(KeyCode.Z) && x != 0 && dashOn == false)
+        if (Input.GetKeyDown(KeyCode.Z) && x != 0 && dashOn == false)
         {
             dashCoroutine = StartCoroutine(Co_Dash(x));
+        }
+        if(Input.GetKeyDown(KeyCode.E) && isPortal)
+        {
+
         }
     }
 
@@ -144,7 +176,7 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(dashCoolTime);
         dashOn = false;
     }
-    
+
 
 
     /// <summary>

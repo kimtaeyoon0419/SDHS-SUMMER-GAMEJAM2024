@@ -17,6 +17,7 @@ public class Monsters
 public class SpawnMonsterIndex
 {
     public string stageName;
+    public Portal stagePortal;
     public Transform spawnTransform;
     public List<Transform> spawnPos;
     public List<Monsters> monsters;
@@ -33,6 +34,9 @@ public class StageManager : MonoBehaviour
     [SerializeField] public List<SpawnMonsterIndex> Stages = new List<SpawnMonsterIndex>();
     [SerializeField] public List<GameObject> aliveMonster;
 
+    [Header("Portal")]
+    [SerializeField] private Portal curStagePortal;
+
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI monsterCountText;
 
@@ -43,7 +47,7 @@ public class StageManager : MonoBehaviour
 
     private void Start()
     {
-        InitStage("Tutorial");
+        InitStage("Stage1");
     }
 
     private void InitStage(string stageName)
@@ -61,6 +65,7 @@ public class StageManager : MonoBehaviour
                     aliveMonster.Add(enemy);
                     Debug.Log("스폰성공!");
                 }
+                curStagePortal = stage.stagePortal;
                 break;
             }
             else
@@ -72,9 +77,14 @@ public class StageManager : MonoBehaviour
 
     private void Update()
     {
-        if (Stages.Count <= 0)
+        if (aliveMonster.Count <= 0)
         {
             monsterCountText.text = "모든 몬스터를 처치했습니다!";
+            if (curStagePortal != null)
+            {
+                curStagePortal.isOpen = true;
+                Debug.Log("포탈오픈");
+            }
         }
         else
         {
