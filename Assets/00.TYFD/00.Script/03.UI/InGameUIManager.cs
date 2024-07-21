@@ -25,12 +25,46 @@ public class InGameUIManager : MonoBehaviour
     [SerializeField] private Transform[] selectBtnPos;
     [SerializeField] private TextMeshProUGUI statUptext;
 
+    [Header("GameOver")]
+    [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private TextMeshProUGUI stageScoreText;
+    [SerializeField] private TextMeshProUGUI gameOverText;
+    [SerializeField] private GameObject returnBtn;
+
     private List<GameObject> activeButtons = new List<GameObject>();
+    bool isGameOver;
 
     private void Awake()
     {
         instance = this;
     }
+
+    private void Start()
+    {
+        StartFadeIn();
+    }
+
+    private void Update()
+    {
+        if (GameManager.instance.curGameState == curGameState.gameOver && !isGameOver)
+        {
+            isGameOver = true;
+            StartCoroutine(Co_GameOverPanelAnim());
+        }
+    }
+
+    IEnumerator Co_GameOverPanelAnim()
+    {
+        gameOverPanel.SetActive(true);
+        yield return new WaitForSeconds(1f);
+        gameOverText.gameObject.SetActive(true);
+        yield return new WaitForSeconds(0.5f);
+        stageScoreText.gameObject.SetActive(true);
+        yield return new WaitForSeconds(0.5f);
+        yield return StartCoroutine(Co_SetStageScore());
+        returnBtn.SetActive(true);
+    }
+
 
     public void StartFadeIn()
     {
@@ -40,6 +74,11 @@ public class InGameUIManager : MonoBehaviour
     public void StartFadeOut(bool ChageStage)
     {
         StartCoroutine(Co_FadeOut(ChageStage));
+    }
+
+    public void UIClickSound()
+    {
+        AudioManager.instance.PlaySfx("ClickSound");
     }
 
     private void OnSelectBtn()
@@ -76,6 +115,26 @@ public class InGameUIManager : MonoBehaviour
         }
     }
 
+    public void ReturnMain()
+    {
+        StartCoroutine(Co_ReturnMain());
+    }
+
+    private IEnumerator Co_SetStageScore()
+    {
+        for(int i = 0; i <= StageManager.instance.curstage; i++)
+        {
+            stageScoreText.text = "도달한 스테이지 : " + i.ToString();
+            yield return new WaitForSeconds(0.05f);
+        }
+    }
+
+    private IEnumerator Co_ReturnMain()
+    {
+        yield return StartCoroutine(Co_FadeOut(false));
+        SceneManager.LoadScene("JHScene");
+    }
+
     public void SeletBtnActive(int btnNum)
     {
         float hp;
@@ -109,11 +168,19 @@ public class InGameUIManager : MonoBehaviour
                 statUptext.text = "스킬이 해금되었습니다";
                 statUptext.gameObject.SetActive(true);
                 StageManager.instance.playerObject.GetComponent<Player>().skillLock = false;
+                StageManager.instance.playerObject.GetComponent<Player>().LockImage.gameObject.SetActive(false);
                 break;
             case 4:
                 statUptext.text = "부활 기회가 1회 증가했습니다";
                 statUptext.gameObject.SetActive(true);
                 StageManager.instance.playerObject.GetComponent<Player>().recoveryCount++;
+                break;
+            case 5:
+                damage = Random.Range(1, 3);
+                float curMaxHp = StageManager.instance.playerObject.GetComponent<Player>().maxHp;
+                hp =  curMaxHp / damage;
+                StageManager.instance.playerObject.GetComponent<Player>().CurHp += hp;
+                statUptext.text = "체력을 " + hp.ToString() + " 만큼 회복했습니다";
                 break;
         }
 

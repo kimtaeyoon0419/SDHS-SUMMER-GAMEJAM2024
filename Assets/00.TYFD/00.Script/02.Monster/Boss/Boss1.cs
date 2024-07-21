@@ -169,6 +169,7 @@ public class Boss1 : MonoBehaviour
     public void HitAttack()
     {
         Collider2D[] player = Physics2D.OverlapBoxAll(attackPos[attackCount].position, attackBox[attackCount], playerLayer);
+        AudioManager.instance.PlaySfx("BossSlash");
         if (attackCount <= 2)
         {
             attackCount++;
@@ -212,6 +213,10 @@ public class Boss1 : MonoBehaviour
             if (curHp <= 0)
             {
                 Debug.Log("ав╬З╢ы");
+                if (!isSkill)
+                {
+                    AudioManager.instance.PlaySfx("SlashHit");
+                }
                 StageManager.instance.aliveMonster.Remove(gameObject);
                 Die();
             }
@@ -220,6 +225,7 @@ public class Boss1 : MonoBehaviour
                 CameraManager.instance.CameraShake(5, 0.2f);
                 if (!isSkill)
                 {
+                    AudioManager.instance.PlaySfx("SlashHit");
                     Instantiate(hitEffect, new Vector2(transform.position.x, transform.position.y - 2f), Quaternion.identity);
                 }
             }
@@ -232,7 +238,7 @@ public class Boss1 : MonoBehaviour
         gameObject.layer = LayerMask.NameToLayer("DeadEnemy");
         isDie = true;
         animator.SetTrigger(hashDie);
-        //StartCoroutine(Co_Destroy());
+        StartCoroutine(Co_Destroy());
     }
 
     IEnumerator Co_Destroy()

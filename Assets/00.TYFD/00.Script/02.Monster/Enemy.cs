@@ -45,6 +45,12 @@ public class Enemy : MonoBehaviour
     [Header("Die")]
     private bool isDie;
 
+    [Header("Ω∫≈» ¡ı∞°∑Æ")]
+    [SerializeField] private float defaultHp;
+    [SerializeField] private float defaultAttack;
+    [SerializeField] private float upHp;
+    [SerializeField] private float upAttack;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -54,7 +60,10 @@ public class Enemy : MonoBehaviour
 
     private void OnEnable()
     {
+        maxHp = defaultHp + upHp * StageManager.instance.curstage;
         curHp = maxHp;
+        attackPower = defaultAttack + upAttack * StageManager.instance.curstage;
+
         //StageManager.instance.monsters.Add(gameObject);
     }
     private void Update()
@@ -168,6 +177,10 @@ public class Enemy : MonoBehaviour
             if (curHp <= 0)
             {
                 Debug.Log("¡◊æ˙¥Ÿ");
+                if(!isSkill)
+                {
+                    AudioManager.instance.PlaySfx("SlashHit");
+                }
                 StageManager.instance.aliveMonster.Remove(gameObject);
                 Die();
             }
@@ -176,6 +189,7 @@ public class Enemy : MonoBehaviour
                 CameraManager.instance.CameraShake(5, 0.2f);
                 if (!isSkill)
                 {
+                    AudioManager.instance.PlaySfx("SlashHit");
                     Instantiate(hitEffect, transform.position, Quaternion.identity);
                 }
             }

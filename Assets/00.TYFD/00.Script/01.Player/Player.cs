@@ -14,8 +14,38 @@ public class Player : MonoBehaviour
     private SpriteRenderer spriteRenderer;
 
     [Header("Stat")]
-    [SerializeField] private float maxHp;
+    [SerializeField] public float maxHp;
     [SerializeField] private float curHp;
+    public float CurHp
+    {
+        get { return curHp; } 
+        set
+        {
+            if (curHp != value)
+            {
+                hpBar.fillAmount = curHp / maxHp;
+            }
+
+            if (curHp > value)
+            {
+                CameraManager.instance.CameraShake(5, 0.2f);
+                StartCoroutine(Co_HitChageColor());
+            }
+
+            curHp = value;
+
+            if (curHp > maxHp)
+            {
+                curHp = maxHp;
+            }
+
+            if (curHp < 0)
+            {
+                curHp = 0;
+                Die();
+            }
+        }
+    }
     [SerializeField] private float attackPower;
     [SerializeField] private float attackSpeed;
     [SerializeField] private float moveSpeed;
@@ -50,6 +80,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float dashSpeed;
     [SerializeField] private float dashTime;
     [SerializeField] private float dashCoolTime;
+    [SerializeField] private float curDashCoolTime;
     [SerializeField] private bool dashOn;
     private float originalMoveSpeed;
     private Coroutine dashCoroutine;
@@ -66,6 +97,8 @@ public class Player : MonoBehaviour
     [SerializeField] private TextMeshProUGUI portalText;
     [SerializeField] private Image skillBlackPnl;
     [SerializeField] private Transform skillPos;
+    [SerializeField] public Image LockImage;
+    [SerializeField] private Image dashBlackPnl;
 
     private void Awake()
     {
@@ -76,11 +109,12 @@ public class Player : MonoBehaviour
 
     private void Start()
     {
-        curHp = maxHp;
+        CurHp = maxHp;
     }
 
     private void Update()
     {
+
         if (GameManager.instance.curGameState != curGameState.selectItem)
         {
             InputFunction();
@@ -88,6 +122,16 @@ public class Player : MonoBehaviour
             {
                 curSkillCoolTime -= Time.deltaTime;
                 skillBlackPnl.fillAmount = curSkillCoolTime / maxSkillCoolTime;
+            }
+
+            if (curDashCoolTime >= 0)
+            {
+                curDashCoolTime -= Time.deltaTime;
+                dashBlackPnl.fillAmount = curDashCoolTime / dashCoolTime;
+            }
+            else
+            {
+                dashOn = false;
             }
         }
     }
@@ -172,6 +216,11 @@ public class Player : MonoBehaviour
             curSkillCoolTime = maxSkillCoolTime;
             Skill();
         }
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            maxHp += 100000;
+            CurHp += 100000;
+        }
     }
 
     private void Skill()
@@ -213,6 +262,7 @@ public class Player : MonoBehaviour
         animator.SetTrigger(hashDash);
         isDash = true;
         dashOn = true;
+        curDashCoolTime = dashCoolTime;
         originalMoveSpeed = moveSpeed;
         moveSpeed = dashSpeed;
         Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), true); // 몬스터와 충돌무시
@@ -220,11 +270,7 @@ public class Player : MonoBehaviour
         moveSpeed = originalMoveSpeed;
         isDash = false;
         Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), false); // 몬스터와 충돌무시
-        yield return new WaitForSeconds(dashCoolTime);
-        dashOn = false;
     }
-
-
 
     /// <summary>
     /// 방향전환
@@ -270,6 +316,7 @@ public class Player : MonoBehaviour
             attackCount = 0;
             OnAttackBox();
         }
+        AudioManager.instance.PlaySfx("Slash");
         StartCoroutine(Co_IsAttacking());
     }
 
@@ -301,23 +348,13 @@ public class Player : MonoBehaviour
         {
             return;
         }
-        curHp -= Damage;
-        hpBar.fillAmount = curHp / maxHp;
-        if (curHp < 0)
-        {
-            Die();
-        }
-        else
-        {
-            CameraManager.instance.CameraShake(5, 0.2f);
-            StartCoroutine(Co_HitChageColor());
-        }
+        CurHp -= Damage;
     }
 
     IEnumerator Co_HitChageColor()
     {
         Physics2D.IgnoreLayerCollision(LayerMask.NameToLayer("Player"), LayerMask.NameToLayer("Enemy"), true); // 몬스터와 충돌무시
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < 2; i++)
         {
             yield return new WaitForSeconds(0.1f);
             spriteRenderer.color = hitColor;
@@ -329,13 +366,13 @@ public class Player : MonoBehaviour
 
     private void Die()
     {
-
+        GameManager.instance.curGameState = curGameState.gameOver;
     }
 
     public void StatUp(float hp, float damage)
     {
         maxHp += hp;
-        curHp += hp;
+        CurHp += hp;
         attackPower += damage;
     }
 }

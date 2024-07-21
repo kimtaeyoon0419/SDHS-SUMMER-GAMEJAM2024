@@ -175,7 +175,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCollider: {fileID: 0}
-  maxHp: 10
+  maxHp: 5
   curHp: 0
   followMoveSpeed: 7
   attackPower: 5
@@ -186,6 +186,10 @@ MonoBehaviour:
   attackBox: {x: 2, y: 1.5}
   hitEffect: {fileID: 2995565206300101524, guid: 93d883820fac49e4d8c675de82d7da2c, type: 3}
   hitText: {fileID: 3124353417991857813, guid: 78e81453bf5b0064e9410b4e3401ee33, type: 3}
+  defaultHp: 5
+  defaultAttack: 5
+  upHp: 2
+  upAttack: 2
 --- !u!70 &160984375836346210
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

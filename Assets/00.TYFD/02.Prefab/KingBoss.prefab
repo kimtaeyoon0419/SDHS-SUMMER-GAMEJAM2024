@@ -218,7 +218,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCollider: {fileID: 0}
-  maxHp: 30
+  maxHp: 100
   curHp: 0
   followMoveSpeed: 2
   attackPower: 15

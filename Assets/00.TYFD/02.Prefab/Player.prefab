@@ -268,7 +268,8 @@ MonoBehaviour:
   hpBar: {fileID: 0}
   dashSpeed: 20
   dashTime: 0.2
-  dashCoolTime: 2
+  dashCoolTime: 1
+  curDashCoolTime: 0
   dashOn: 0
   skillObj: {fileID: 4746765419672326184, guid: b7d8fdb56b2de944785d16d8f408c3af, type: 3}
   maxSkillCoolTime: 2
@@ -277,3 +278,5 @@ MonoBehaviour:
   portalText: {fileID: 0}
   skillBlackPnl: {fileID: 0}
   skillPos: {fileID: 96971983}
+  LockImage: {fileID: 0}
+  dashBlackPnl: {fileID: 0}

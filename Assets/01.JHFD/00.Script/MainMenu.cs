@@ -28,16 +28,11 @@ public class MainMenu : MonoBehaviour
         StartFadeIn();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void UIClickSound()
     {
-        
+        AudioManager.instance.PlaySfx("ClickSound");
     }
 
-    public void OnClickStart()
-    {
-        
-    }
 
     public void OnClickOption()
     {

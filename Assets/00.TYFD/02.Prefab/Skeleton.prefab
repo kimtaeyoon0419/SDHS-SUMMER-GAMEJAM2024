@@ -154,10 +154,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCollider: {fileID: 0}
-  maxHp: 7
+  maxHp: 4
   curHp: 0
   followMoveSpeed: 8
-  attackPower: 8
+  attackPower: 5
   playerLayer:
     serializedVersion: 2
     m_Bits: 8
@@ -165,6 +165,10 @@ MonoBehaviour:
   attackBox: {x: 2, y: 1.5}
   hitEffect: {fileID: 2995565206300101524, guid: 93d883820fac49e4d8c675de82d7da2c, type: 3}
   hitText: {fileID: 3124353417991857813, guid: 78e81453bf5b0064e9410b4e3401ee33, type: 3}
+  defaultHp: 4
+  defaultAttack: 5
+  upHp: 2
+  upAttack: 3
 --- !u!50 &165966988378390160
 Rigidbody2D:
   serializedVersion: 4
@@ -180,7 +184,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 5
+  m_GravityScale: 6
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
